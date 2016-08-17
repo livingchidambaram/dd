@@ -1,0 +1,141 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta name="viewport" content="width=device-width">
+<title>SolarCalculator</title>
+</head>
+   <body>
+<script>
+    var dcloads = 1;
+	var acloads = 1;
+
+    var limit = 20;
+
+    function addInput(divName){
+    if(divName == "dcload"){
+         if (dcloads == limit)  {
+
+              alert("You have reached the limit of adding " + dcloads + " inputs");
+
+         }
+
+         else {
+
+              var newdiv = document.createElement('div'+dcloads);
+
+              newdiv.innerHTML = "<br>Load<input type='text' name='mydctype"+dcloads +"'" + " id='mydctype"+dcloads +"'"+ ">Watts<input type='text' name='mydcwatt"+dcloads +"'" + " id='mydcwatt"+dcloads +"'"+ ">";
+			  
+              document.getElementById(divName).appendChild(newdiv);
+
+              dcloads++;
+
+         }
+    }else if(divName == "acload"){
+	         if (acloads == limit)  {
+
+              alert("You have reached the limit of adding " + acloads + " inputs");
+
+         }
+
+         else {
+
+              var newdiv = document.createElement('div'+acloads);
+
+               newdiv.innerHTML = "<br>Load<input type='text' name='myactype"+acloads +"'" + " id='myactype"+acloads +"'"+ ">Watts<input type='text' name='myacwatt"+acloads +"'" + " id='myacwatt"+acloads +"'"+ ">";
+              document.getElementById(divName).appendChild(newdiv);
+
+              acloads++;
+
+         }
+	}
+    }
+
+	function removeInput(divName){
+	var p=document.getElementById(divName);
+    var item = p.lastElementChild;
+		if(item != null){
+		p.removeChild(item);
+		if(divName == "dcload"){
+		dcloads--;
+		}else{
+		acloads--;
+		}
+
+		}
+	}
+
+	function showdata(){
+var s=document.getElementById("mydctype3");
+alert(s.value);
+
+	}
+
+function updatedata(){
+var dcwatts, acwatts,loadval;
+vardcwatts = "mydcwatt";
+varacwatts = "myacwatt";
+dcwatts = 0;
+acwatts = 0;
+for (var i = 0; i < dcloads; i++) {
+if(i>0){vardcwatts = "mydcwatt" +i ;}
+loadval = document.getElementById(vardcwatts).value;
+dcwatts = dcwatts + parseInt(loadval);
+}
+for (var i = 0; i < acloads; i++) {
+if(i>0){varacwatts = "myacwatt" +i ;}
+loadval = document.getElementById(varacwatts).value;
+acwatts = acwatts + parseInt(loadval);
+}
+var dctot=document.getElementById("dcloadtotal");
+dctot.value = dcwatts;
+var actot=document.getElementById("acloadtotal");
+actot.value = acwatts;
+var tot=document.getElementById("loadtotal");
+tot.value = dcwatts + acwatts;
+}
+</script>
+<div id="heading">
+<h1>Solar PV Calculator</h1>
+</div>
+<div id="userinput">
+
+
+		<table>
+			<tr> 
+			<td>
+    			<div id="dcload">
+
+          Type<input type="text" name="mydctype" id="mydctype">
+			Watts<input type="text" name="mydcwatt" id="mydcwatt">
+     </div>
+ <input type="button" value="&#x2295;" style="font-size:35px;" onClick="addInput('dcload');">
+ <input type="button" value="&#x229d;" style="font-size:35px;" onClick="removeInput('dcload');">
+			</td>	
+<td>
+    			<div id="acload">
+
+          Type<input type="text" name="myactype" id="myactype">
+			Watts<input type="text" name="myacwatt" id="myacwatt">
+     </div>
+ <input type="button" value="&#x2295;" style="font-size:35px;" onClick="addInput('acload');">
+ <input type="button" value="&#x229d;" style="font-size:35px;" onClick="removeInput('acload');">
+			</td>	
+			</tr>
+		</table>
+
+<br>
+<input type="button" value="UpdateData" style="font-size:35px;" onClick="updatedata();">
+<hr>
+<br>
+<h3>Total DC Load</h3><input type="text" name="dcloadtotal" id="dcloadtotal" value="0">watts
+<h3>Total AC Load</h3><input type="text" name="acloadtotal" id="acloadtotal" value="0">watts
+<h3>Total System Load</h3><input type="text" name="loadtotal" id="loadtotal" value="0">watts
+
+    
+</div>
+ <input type="button" value="Test" style="font-size:35px;" onClick="showdata();">
+<div>
+<p>Copyright 2016-2020. All rights reserved</p>
+</div>
+   </body>
+</html>
