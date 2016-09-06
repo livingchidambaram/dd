@@ -3,8 +3,20 @@
 <head>
 <meta name="viewport" content="width=device-width">
 <title>SolarCalculator</title>
+<style>
+.app { background:#ccc; }
+
+.appbox { background: #444; padding: 20px;  position: relative;
+width:80%;
+left: 10%;
+right:10%;
+ }
+.appboxinner { 
+	background: #fff; padding: 10px;  position: relative;-moz-box-shadow: inset 0 1px 0 #444; -webkit-box-shadow: inset 0 1px 0 #444; box-shadow: inset 0 1px 0 #444;
+}
+</style>
 </head>
-   <body>
+   <body class="app">
 <script>
     var dcloads = 1;
 	var acloads = 1;
@@ -22,8 +34,8 @@
          else {
 
               var newdiv = document.createElement('div'+dcloads);
-
-              newdiv.innerHTML = "<br>Load<input type='text' name='mydctype"+dcloads +"'" + " id='mydctype"+dcloads +"'"+ ">Watts<input type='text' name='mydcwatt"+dcloads +"'" + " id='mydcwatt"+dcloads +"'"+ ">";
+              newdiv.style = "style='clear:both;' padding: 5px 5px;";
+              newdiv.innerHTML = "Load<input type='text' name='mydctype"+dcloads +"'" + " id='mydctype"+dcloads +"'"+ "style= 'width:35%;'>"+"&nbsp;"+"Watts<input type='text' name='mydcwatt"+dcloads +"'" + " id='mydcwatt"+dcloads +"'"+ "style= 'width:35%;'><hr>";
 			  
               document.getElementById(divName).appendChild(newdiv);
 
@@ -40,8 +52,8 @@
          else {
 
               var newdiv = document.createElement('div'+acloads);
-
-               newdiv.innerHTML = "<br>Load<input type='text' name='myactype"+acloads +"'" + " id='myactype"+acloads +"'"+ ">Watts<input type='text' name='myacwatt"+acloads +"'" + " id='myacwatt"+acloads +"'"+ ">";
+				newdiv.style = "style='clear:both;' padding: 5px 5px;";
+               newdiv.innerHTML = "Load<input type='text' name='myactype"+acloads +"'" + " id='myactype"+acloads +"'"+ "style= 'width:35%;'>"+"&nbsp;"+"Watts<input type='text' name='myacwatt"+acloads +"'" + " id='myacwatt"+acloads +"'"+ "style= 'width:35%;'><hr>";
               document.getElementById(divName).appendChild(newdiv);
 
               acloads++;
@@ -50,10 +62,11 @@
 	}
     }
 
-	function removeInput(divName){
+	function removeInput(divName){	
 	var p=document.getElementById(divName);
     var item = p.lastElementChild;
-		if(item != null){
+	var tn = p.lastElementChild.tagName;
+		if(item != null && tn != "HR"){
 		p.removeChild(item);
 		if(divName == "dcload"){
 		dcloads--;
@@ -64,18 +77,229 @@
 		}
 	}
 
-	function showdata(){
-var s=document.getElementById("mydctype3");
-alert(s.value);
-
+function processdata(){
+/*var pvmarket="3;3;5;6;8;10;12;15;18;20;24;25;30;35;36;37;40;45;50;60;
+74;75;80;100;105;110;115;120;125;130;135;140;145;150;155;160;165;170;175;
+180;185;190;195;200;205;210;215;220;225;230;235;240;245;250;255;260;265;
+270;275;290;295;300;305;310;315;320;325";*/
+var batterysizes = [100,110,120,135,150,160,165,180,200];
+var totalwatts = document.getElementById("designload").innerHTML;
+var totstr = totalwatts.toString();
+var strlen = totstr.length;
+var pvwatts = 0;
+var toadd =0;
+var bhtotal =0;
+if(strlen > 2){
+var lasttwostr = totstr.charAt(strlen-2) + totstr.charAt(strlen-1);
+var lasttwodigits = parseInt(lasttwostr);
+	if(lasttwodigits > 50){
+	toadd = 100 - lasttwodigits;
+	}else{
+	toadd = 50 - lasttwodigits;
 	}
+}else if(strlen == 2){
+var lasttwostr = totstr.charAt(0) + totstr.charAt(1);
+var lasttwodigits = parseInt(lasttwostr);
+	if(lasttwodigits > 50){
+	toadd = 100 - lasttwodigits;
+	}else{
+	toadd = 50 - lasttwodigits;
+	}
+}
+pvwatts = parseInt(totalwatts) + toadd;
+
+document.getElementById("results").innerHTML = "<h3 style='text-align:center;'>Results</h3>"+ 
+"<br>" +
+"<table border='1px' style='width:100%;'>"+
+"<tr>" +
+"<td style='width:50%;'><h4>Required PV panel watts</h4></td><td><input type='text' name='pvload' id='pvload' value='0'>watts</td>"+
+"</tr>"+
+"<tr>"+
+"<td><h4>Battery Bank </h4></td><td><input type='text' name='bb' id='bb' value='0'>AH (Estimated)" +
+"<input type='text' name='bah' id='bah' value='00:00'> (AH:Nos) <input type='text' name='tbah' id='tbah' value='00'> AH (Actual) </td>"+ 
+"</tr>"+
+"<tr>"+
+"<td><h4>Revised Power Backup Time</h4></td><td><input type='text' name='r_backup_hr' id='r_backup_hr' value='0'>Hours"+
+"<input type='text' name='r_backup_min' id='r_backup_min' value='0'>Minutes </td>" +
+"</tr>"+
+"<tr>"+
+"<td><h4>Average Cost of PV panel </h4></td><td  style='text-align:center;'>&#8377;&nbsp;<b name='pvprice' id='pvprice'></b></td>" +
+"</tr>"+
+"<tr>"+
+"<td><h4>Average Cost of Battery Bank </h4></td><td  style='text-align:center;'>&#8377;&nbsp;<b name='bbprice' id='bbprice'></b></td>" +
+"</tr>"+
+"<tr>"+
+"<td><h4>Average Cost of Solar System </h4></td><td style='text-align:center;'>&#8377;&nbsp;<b name='ssprice' id='ssprice'></b></td>" +
+"</tr>"+
+"</table>";
+var pv=document.getElementById("pvload");
+var bbval =document.getElementById("bb");
+var bahval =document.getElementById("bah");
+var tbahval =document.getElementById("tbah");
+var rbhr =document.getElementById("r_backup_hr");
+var rbmin =document.getElementById("r_backup_min");
+var panelprice = document.getElementById("pvprice");
+var batteryprice = document.getElementById("bbprice");
+var solarsystemprice = document.getElementById("ssprice");
+
+
+pv.value = pvwatts;
+var bh = document.getElementById("backup_hr").value;
+var bmin = document.getElementById("backup_min").value;
+
+var batteryahnos;
+if(bh =="0" && bmin == "0"){
+
+bbval.value = "0";
+
+bahval.value = "00:00" ;
+
+tbahval.value = "0";
+
+rbhr.value = "0";
+
+rbmin.value = "0";
+
+
+
+return;
+}
+
+
+batteryahnos = processbatterybackup();
+
+var nos = 0;
+var ah = 0;
+var bah;
+if(batteryahnos <=200){
+
+for(bah in batterysizes){
+if(batterysizes[bah] >= batteryahnos){
+nos =1;
+ah = batterysizes[bah];
+bhtotal = batterysizes[bah];
+break;
+}
+}
+
+}else{
+
+
+var timesofmah = Math.floor(batteryahnos/200);
+
+if(timesofmah >= 2){
+nos = timesofmah;
+var leftout = batteryahnos - (200*nos);
+	for(bah in batterysizes){
+		if(batterysizes[bah] >= leftout){
+		nos = nos + 1;
+		ah = "{" + "200" + "("+timesofmah+")" + "," + batterysizes[bah]+ "}";
+		bhtotal = 200*timesofmah + batterysizes[bah];
+		break;
+		}
+	}
+}else{
+var bahloop;
+	for(bahloop in batterysizes){
+		for(bah in batterysizes){
+			if(batterysizes[bahloop] + batterysizes[bah] >= batteryahnos){
+			nos =2;
+			ah = "{"+ batterysizes[bahloop]+ "," + batterysizes[bah] + "}";
+			bhtotal = batterysizes[bahloop]+ batterysizes[bah];
+			break;
+			}
+		}
+	}
+}
+
+
+
+}
+
+
+bbval.value = batteryahnos;
+bahval.value = ah + ":" + nos ;
+tbahval.value = bhtotal;
+var rbackup = batterybackuptime(bhtotal,pvwatts);
+var tmp = (rbackup + "").split(".");
+var intpart = tmp[0];
+var minpart = (rbackup - parseInt(intpart))*60;
+var tmp1 = (minpart + "").split(".");
+var intpart1 = tmp1[0];
+rbhr.value = intpart;
+rbmin.value = intpart1;
+
+//price calculation
+
+var pvprice = pvwatts * 38; // Rs.38/watt
+panelprice.innerHTML = pvprice;
+var bbprice = bhtotal * 100; // Rs.100 / AH
+batteryprice.innerHTML = bbprice;
+solarsystemprice.innerHTML =pvprice + bbprice + pvwatts*16 + pvwatts*5;
+}
+
+function resetinputs(){
+document.getElementById("ebbill").value = "0.0";
+document.getElementById("mydctype").value = "";
+document.getElementById("mydcwatt").value = "";
+document.getElementById("myactype").value = "";
+document.getElementById("myacwatt").value = "";
+while(dcloads > 1){
+removeInput("dcload");
+}
+while(acloads > 1){
+removeInput("acload");
+}
+}
 
 function updatedata(){
 var dcwatts, acwatts,loadval;
-vardcwatts = "mydcwatt";
-varacwatts = "myacwatt";
+var dload,dloadint;
+var vardcwatts = "mydcwatt";
+var varacwatts = "myacwatt";
 dcwatts = 0;
 acwatts = 0;
+var intpart;
+var tmp;
+var checkebbill = document.getElementById("ebbill").value;
+if(checkebbill != "0.0"){
+	var units = 0;
+ tmp = checkebbill.split(".");
+ var rupees = parseInt(tmp[0]);
+ 	if(rupees =="0"){
+	units = 100;
+	}else{
+//class 1 :oldEbAmount = 20 + 1.5 * (ebUnits-100);
+//class 2 :oldEbAmount = 30 + 200 + ((ebUnits - 200) * 3);
+//class 3 :oldEbAmount = 50 + 100 * 3.5 + 300 * 4.6 + ((ebUnits - 500) * 6.6);
+var kwh;
+ if(rupees <= 170){
+	kwh = (rupees - 20)/1.5 + 100;
+}else if(rupees >= 233 && rupees <= 1130){
+	kwh = (rupees - 30 - 200)/3 + 200;
+}else if(rupees >= 1786){
+	kwh = (rupees - 20 - 100*3.5 - 300*4.6)/6.6 + 500;
+}
+	}
+
+var avgwatts =( kwh * 1000 )/ (60*24);
+
+document.getElementById("dcloadtotal").innerHTML = "NA";
+document.getElementById("acloadtotal").innerHTML = "NA";
+var tot=dcwatts + acwatts;
+document.getElementById("loadtotal").innerHTML = avgwatts;
+
+
+dload = avgwatts + 0.12*avgwatts ;
+
+tmp = (dload + "").split(".");
+intpart = tmp[0];
+dloadint = parseInt(intpart) + 1;
+document.getElementById("designload").innerHTML = dloadint;
+return;
+}
+
+
 for (var i = 0; i < dcloads; i++) {
 if(i>0){vardcwatts = "mydcwatt" +i ;}
 loadval = document.getElementById(vardcwatts).value;
@@ -86,55 +310,118 @@ if(i>0){varacwatts = "myacwatt" +i ;}
 loadval = document.getElementById(varacwatts).value;
 acwatts = acwatts + parseInt(loadval);
 }
-var dctot=document.getElementById("dcloadtotal");
-dctot.value = dcwatts;
-var actot=document.getElementById("acloadtotal");
-actot.value = acwatts;
-var tot=document.getElementById("loadtotal");
-tot.value = dcwatts + acwatts;
+
+
+document.getElementById("dcloadtotal").innerHTML = dcwatts;
+document.getElementById("acloadtotal").innerHTML = acwatts;
+var tot=dcwatts + acwatts;
+document.getElementById("loadtotal").innerHTML = tot;
+
+dload = dcwatts + 0.12*dcwatts + acwatts + 0.12*acwatts;
+
+tmp = (dload + "").split(".");
+intpart = tmp[0];
+dloadint = parseInt(intpart) + 1;
+document.getElementById("designload").innerHTML = dloadint;
+}
+
+function processbatterybackup(){
+//formula: BackupTime = (AH x 12 x nos x Discharge depth x Inverter efficiency) / Load
+//Assumptions: Discharge depth - 50% (.5), Inverter efficiency = 0.85
+
+var backupconstant = 5.1; //(12x0.5x0.85)
+var pv=document.getElementById("pvload").value;
+var bh = document.getElementById("backup_hr").value;
+var bmin = document.getElementById("backup_min").value;
+var backup = parseInt(bh) + (parseInt(bmin)/60);
+var ahnos = backup * parseInt(pv) /backupconstant;
+var tmp = (ahnos + "").split(".");
+var intpart = tmp[0];
+var ahnos = parseInt(intpart) + 1;
+return ahnos;
+}
+
+function batterybackuptime(tah,load){
+var backupconstant = 5.1; //(12x0.5x0.85)
+return (tah*backupconstant)/load;
 }
 </script>
-<div id="heading">
-<h1>Solar PV Calculator</h1>
-</div>
+<div class="appbox radius">
+<h2 style="color:#FFF;text-align:center">Solar PV Calculator</h2>
+	<div class="appboxinner radius">
+
 <div id="userinput">
 
 
-		<table>
+		<table border="1px" style="width:100%;">
+<tr>
+<td><h3 style="text-align:center;">DC Load</h3></td>
+<td><h3 style="text-align:center;">AC Load</h3></td>
+</tr>
 			<tr> 
 			<td>
-    			<div id="dcload">
+    			<div id="dcload" style="padding: 5px 5px;">
 
-          Type<input type="text" name="mydctype" id="mydctype">
-			Watts<input type="text" name="mydcwatt" id="mydcwatt">
-     </div>
- <input type="button" value="&#x2295;" style="font-size:35px;" onClick="addInput('dcload');">
- <input type="button" value="&#x229d;" style="font-size:35px;" onClick="removeInput('dcload');">
+          Load <input type="text" name="mydctype" id="mydctype" style="width:35%;">
+
+			Watts<input type="text" name="mydcwatt" id="mydcwatt" style="width:35%;">
+<hr>    
+ </div>
+<div id="dcbuttons" style="text-align:center;">
+ <input type="button" value="&#x2295;" style="font-size:35px;padding: 10px 10px;" onClick="addInput('dcload');">
+ <input type="button" value="&#x229d;" style="font-size:35px;padding: 10px 10px;" onClick="removeInput('dcload');">
+</div>
 			</td>	
 <td>
-    			<div id="acload">
+    			<div id="acload" style="padding: 5px 5px;">
 
-          Type<input type="text" name="myactype" id="myactype">
-			Watts<input type="text" name="myacwatt" id="myacwatt">
+          Load<input type="text" name="myactype" id="myactype" style="width:35%;">
+
+			Watts<input type="text" name="myacwatt" id="myacwatt" style="width:35%;">
+<hr>
      </div>
- <input type="button" value="&#x2295;" style="font-size:35px;" onClick="addInput('acload');">
- <input type="button" value="&#x229d;" style="font-size:35px;" onClick="removeInput('acload');">
+<div id="acbuttons" style="text-align:center;">
+ <input type="button" value="&#x2295;" style="font-size:35px;padding: 10px 10px;" onClick="addInput('acload');">
+ <input type="button" value="&#x229d;" style="font-size:35px;padding: 10px 10px;" onClick="removeInput('acload');">
+</div>
 			</td>	
 			</tr>
+<tr>
+<td colspan = "2"> Last Month TNEB Electricity Bill in Rupees(Optional)&nbsp;<input type="text" name="ebbill" id="ebbill" style="width:35%;" value="0.0"><input type="button" value="ResetInputs" style="font-size:16px;" onClick="resetinputs();"></td>
+</tr>
 		</table>
 
 <br>
-<input type="button" value="UpdateData" style="font-size:35px;" onClick="updatedata();">
+<input type="button" value="UpdateData" style="font-size:25px;" onClick="updatedata();">
 <hr>
 <br>
-<h3>Total DC Load</h3><input type="text" name="dcloadtotal" id="dcloadtotal" value="0">watts
-<h3>Total AC Load</h3><input type="text" name="acloadtotal" id="acloadtotal" value="0">watts
-<h3>Total System Load</h3><input type="text" name="loadtotal" id="loadtotal" value="0">watts
+<table border="1px" style="width:100%;">
+<tr>
+<td width="50%" style="padding: 10px 10px;">
 
-    
+<p>Total DC Load&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <b name="dcloadtotal" id="dcloadtotal"></b>&nbsp;watts</p>
+<hr style="clear:both;">
+<p>Total AC Load&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <b name="acloadtotal" id="acloadtotal"></b>&nbsp;watts</p>
+<hr style="clear:both;">
+<p>Total System Load  : <b name="loadtotal" id="loadtotal"></b>&nbsp;watts</p>
+</td>
+<td style="padding: 10px 10px;">
+<p>Design Load&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<b name="designload" id="designload"></b>&nbsp;watts</p>
+<p>(with additional expansion and marginal %)</p>    
+<hr>
+<p>Expected Power Backup Time</p><input type="text" name="backup_hr" id="backup_hr" value="0"style="width:30%;padding: 5px 5px;">Hours<input type="text" name="backup_min" id="backup_min" value="0"style="width:30%;padding: 5px 5px;">Minutes
+</td>
+</tr>
+</table>
+<br>
+
+ <input type="button" value="Process Design Inputs" style="font-size:25px;" onClick="processdata();">
+<div id="results">
 </div>
- <input type="button" value="Test" style="font-size:35px;" onClick="showdata();">
-<div>
+</div><!--appboxinner-->
+</div><!--appbox-->
+
+<div style="clear:both;color: #ccc;">
 <p>Copyright 2016-2020. All rights reserved</p>
 </div>
    </body>
